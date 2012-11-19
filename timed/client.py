@@ -74,7 +74,6 @@ def status(logfile, time_format):
 @cmdapp.cmd
 def start(project, logfile, time_format):
   "start tracking for <project>"
-  import pdb; pdb.set_trace()
   records = read(logfile, time_format)
   if records and not records[-1][1][1]:
     print "error: there is a project already active"
