@@ -10,12 +10,35 @@ from termcolor import colored
 from timed import server
 from timed import cmdapp
 
+import os.path
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
 now = datetime.datetime.now
 
 def main():
   cmdapp.main(name='timed', desc=__doc__, config={
     'logfile': os.path.expanduser('~/.timed'),
     'time_format': '%H:%M on %d %b %Y'})
+
+@cmdapp.cmd
+def accounts(logfile, time_format, 
+    conffile=os.path.expanduser("~/.sctime/settings.xml")):
+  "print a lists of personal accounts"
+  tree = ET.ElementTree(file=conffile)
+  for elem in tree.iterfind('abteilung/konto'):
+    if elem.attrib.has_key("name"):
+      #print elem.tag, elem.attrib["name"]
+      print elem.tag, "%s" % colored(elem.attrib["name"], 'green')
+    uenterkonten=[]  
+    for b in elem.iterfind('unterkonto'):
+        uenterkonten.append(b.attrib["name"])
+    print ';'.join(uenterkonten)
+
+   
+
 
 @cmdapp.cmd
 def summary(logfile, time_format):
@@ -51,7 +74,7 @@ def status(logfile, time_format):
 @cmdapp.cmd
 def start(project, logfile, time_format):
   "start tracking for <project>"
-
+  import pdb; pdb.set_trace()
   records = read(logfile, time_format)
   if records and not records[-1][1][1]:
     print "error: there is a project already active"
@@ -64,7 +87,7 @@ def start(project, logfile, time_format):
 
 @cmdapp.cmd
 def stop(logfile, time_format):
-  "stop tracking for the active project"
+  "stop tracking  for the active project"
 
   def save_and_output(records):
     records = server.stop(records)
